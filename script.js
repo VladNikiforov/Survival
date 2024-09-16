@@ -54,6 +54,24 @@ function loadWorld(offsetX, offsetY) {
 }
 loadWorld()
 
+function test() {
+  terrain.forEach((x) => {
+    x.forEach((y, i) => {
+      if (y == '#228b22') {
+        console.log('grass!')
+        if (x[i + 1] == '#239ac9') {
+          console.log('grass next to water')
+        } else {
+          console.log('bruh')
+        }
+      } else {
+        console.log('not grass')
+      }
+    })
+  })
+}
+test()
+
 //PLAYER & PLAYER MOVEMENT
 function playerMovement() {
   let xPos = 0
