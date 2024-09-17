@@ -4,28 +4,31 @@ const ctx = canvas.getContext('2d')
 canvas.height = window.innerHeight
 canvas.width = window.innerWidth
 
+//BLOCKS
 const tileSize = 50
+
+const water_block = '#239ac9'
+const ice_block = '#85d5e4'
+const grass_block = '#228b22'
+const stone_block = '#767c7e'
+const snow_block = '#ffffff'
+const sand_block = '#ebf55b'
 
 //WORLD GENERATION
 let row = Math.round(canvas.width / tileSize) * 5
 let column = Math.round(canvas.height / tileSize) * 5
 
 let terrain = []
-const simplex = new SimplexNoise()
-
-const water_block = '#239ac9'
-const grass_block = '#228b22'
-const stone_block = '#767c7e'
-const snow_block = '#ffffff'
-const sand_block = '#ebf55b'
 
 function generateWorld() {
+  const simplexTerrain = new SimplexNoise()
   const noiseScale = 0.03
+
   for (let x = 0; x < row; x++) {
     let terrainRow = []
 
     for (let y = 0; y < column; y++) {
-      let noiseValue = simplex.noise2D(x * noiseScale, y * noiseScale)
+      let noiseValue = simplexTerrain.noise2D(x * noiseScale, y * noiseScale)
       noiseValue = ((noiseValue + 1) / 2) * 100
 
       if (noiseValue <= 40) {
@@ -44,7 +47,33 @@ function generateWorld() {
     terrain.push(terrainRow)
   }
 }
-generateWorld()
+
+function assignTempeture() {
+  let simplexTempeture = new SimplexNoise()
+  const tempetureNoiseScale = 0.015
+
+  for (let x = 0; x < row; x++) {
+    let terrainRow = []
+
+    for (let y = 0; y < column; y++) {
+      let tempetureNoiseValue = simplexTempeture.noise2D(x * tempetureNoiseScale, y * tempetureNoiseScale)
+      tempetureNoiseValue = ((tempetureNoiseValue + 1) / 2) * 100
+
+      if (tempetureNoiseValue >= 66) {
+        ctx.fillStyle = snow_block
+      } else if (tempetureNoiseValue >= 33) {
+        ctx.fillStyle = grass_block
+      } else if (tempetureNoiseValue >= 0) {
+        ctx.fillStyle = sand_block
+      }
+      terrainRow.push(ctx.fillStyle)
+
+      ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize)
+    }
+    terrain.push(terrainRow)
+  }
+}
+assignTempeture()
 
 function loadWorld(offsetX, offsetY) {
   for (let x = 0; x <= row; x++) {
@@ -109,7 +138,6 @@ function playerMovement() {
         break
       case 'KeyD':
         loadWorld((xPos -= 10), yPos)
-
         break
       default:
         loadWorld(xPos, yPos)
