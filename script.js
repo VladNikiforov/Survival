@@ -8,17 +8,46 @@ canvas.width = window.innerWidth
 const tileSize = 50
 
 const water_block = '#239ac9'
-const ice_block = '#85d5e4'
+const sand_block = '#ebf55b'
 const grass_block = '#228b22'
 const stone_block = '#767c7e'
+const coal_block = '#000000'
+const copper_block = '#ff5e00'
+const iron_block = '#a5a5a5'
 const snow_block = '#ffffff'
-const sand_block = '#ebf55b'
 
 //WORLD GENERATION
 let row = Math.round(canvas.width / tileSize) * 5
 let column = Math.round(canvas.height / tileSize) * 5
 
 let terrain = []
+
+function assignTempeture() {
+  let simplexTempeture = new SimplexNoise()
+  const tempetureNoiseScale = 0.015
+
+  for (let x = 0; x < row; x++) {
+    let terrainRow = []
+
+    for (let y = 0; y < column; y++) {
+      let tempetureNoiseValue = simplexTempeture.noise2D(x * tempetureNoiseScale, y * tempetureNoiseScale)
+      tempetureNoiseValue = ((tempetureNoiseValue + 1) / 2) * 100
+
+      if (tempetureNoiseValue >= 66) {
+        ctx.fillStyle = snow_block
+      } else if (tempetureNoiseValue >= 33) {
+        ctx.fillStyle = grass_block
+      } else if (tempetureNoiseValue >= 0) {
+        ctx.fillStyle = sand_block
+      }
+      terrainRow.push(ctx.fillStyle)
+
+      ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize)
+    }
+    terrain.push(terrainRow)
+  }
+}
+//assignTempeture()
 
 function generateWorld() {
   const simplexTerrain = new SimplexNoise()
@@ -47,33 +76,7 @@ function generateWorld() {
     terrain.push(terrainRow)
   }
 }
-
-function assignTempeture() {
-  let simplexTempeture = new SimplexNoise()
-  const tempetureNoiseScale = 0.015
-
-  for (let x = 0; x < row; x++) {
-    let terrainRow = []
-
-    for (let y = 0; y < column; y++) {
-      let tempetureNoiseValue = simplexTempeture.noise2D(x * tempetureNoiseScale, y * tempetureNoiseScale)
-      tempetureNoiseValue = ((tempetureNoiseValue + 1) / 2) * 100
-
-      if (tempetureNoiseValue >= 66) {
-        ctx.fillStyle = snow_block
-      } else if (tempetureNoiseValue >= 33) {
-        ctx.fillStyle = grass_block
-      } else if (tempetureNoiseValue >= 0) {
-        ctx.fillStyle = sand_block
-      }
-      terrainRow.push(ctx.fillStyle)
-
-      ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize)
-    }
-    terrain.push(terrainRow)
-  }
-}
-assignTempeture()
+generateWorld()
 
 function loadWorld(offsetX, offsetY) {
   for (let x = 0; x <= row; x++) {
@@ -89,9 +92,15 @@ function loadWorld(offsetX, offsetY) {
   }
 }
 
-function addSand() {
+function generateSand() {
+  let simplexSand = new SimplexNoise()
+  const sandNoiseScale = 0.03
+
   terrain.forEach((x, xi) => {
     x.forEach((y, yi) => {
+      let sandNoiseValue = simplexSand.noise2D(xi * sandNoiseScale, yi * sandNoiseScale)
+      sandNoiseValue = (sandNoiseValue + 1) / 2
+
       if (y == grass_block) {
         if (
           x[yi + 1] == water_block ||
@@ -99,7 +108,9 @@ function addSand() {
           (terrain[xi + 1] && terrain[xi + 1][yi]) == water_block ||
           (terrain[xi - 1] && terrain[xi - 1][yi]) == water_block
         ) {
-          terrain[xi][yi] = sand_block
+          if (sandNoiseValue > 0.45) {
+            terrain[xi][yi] = sand_block
+          }
         }
       }
     })
@@ -107,10 +118,33 @@ function addSand() {
 
   loadWorld()
 }
-addSand()
+generateSand()
+
+function generateOres() {
+  let simplexOres = new SimplexNoise()
+
+  terrain.forEach((x, xi) => {
+    x.forEach((y, yi) => {
+      let oresNoiseValue = simplexOres.noise2D(xi, yi)
+      oresNoiseValue = (oresNoiseValue + 1) / 2
+
+      if (y == stone_block) {
+        if (oresNoiseValue > 0.95) {
+          terrain[xi][yi] = iron_block
+        } else if (oresNoiseValue > 0.9) {
+          terrain[xi][yi] = copper_block
+        } else if (oresNoiseValue > 0.85) {
+          terrain[xi][yi] = coal_block
+        }
+      }
+    })
+  })
+
+  loadWorld()
+}
+generateOres()
 
 //PLAYER & PLAYER MOVEMENT
-//(the player isn't actually moving lol)
 function playerMovement() {
   let xPos = 0
   let yPos = 0
@@ -153,5 +187,4 @@ function playerMovement() {
     )
   })
 }
-
 playerMovement()
