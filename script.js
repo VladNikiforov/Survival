@@ -11,10 +11,10 @@ const water_block = '#239ac9'
 const sand_block = '#ebf55b'
 const grass_block = '#228b22'
 const stone_block = '#767c7e'
-const coal_block = '#000000'
+const coal_block = '#000'
 const copper_block = '#ff5e00'
 const iron_block = '#a5a5a5'
-const snow_block = '#ffffff'
+const snow_block = '#fff'
 
 //WORLD GENERATION
 let row = Math.round(canvas.width / tileSize) * 5
@@ -31,21 +31,20 @@ function assignTempeture() {
 
     for (let y = 0; y < column; y++) {
       let tempetureNoiseValue = simplexTempeture.noise2D(x * tempetureNoiseScale, y * tempetureNoiseScale)
-      tempetureNoiseValue = ((tempetureNoiseValue + 1) / 2) * 100
+      tempetureNoiseValue = (tempetureNoiseValue + 1) / 2
 
-      if (tempetureNoiseValue >= 66) {
+      if (tempetureNoiseValue >= 0.66) {
         ctx.fillStyle = snow_block
-      } else if (tempetureNoiseValue >= 33) {
+      } else if (tempetureNoiseValue >= 0.33) {
         ctx.fillStyle = grass_block
       } else if (tempetureNoiseValue >= 0) {
         ctx.fillStyle = sand_block
       }
       terrainRow.push(ctx.fillStyle)
-
-      ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize)
     }
     terrain.push(terrainRow)
   }
+  loadWorld(0, 0)
 }
 //assignTempeture()
 
@@ -58,39 +57,28 @@ function generateWorld() {
 
     for (let y = 0; y < column; y++) {
       let noiseValue = simplexTerrain.noise2D(x * noiseScale, y * noiseScale)
-      noiseValue = ((noiseValue + 1) / 2) * 100
+      noiseValue = (noiseValue + 1) / 2
 
-      if (noiseValue <= 40) {
+      if (noiseValue <= 0.4) {
         ctx.fillStyle = water_block
-      } else if (noiseValue <= 70) {
+      } else if (noiseValue <= 0.7) {
         ctx.fillStyle = grass_block
-      } else if (noiseValue <= 90) {
+      } else if (noiseValue <= 0.9) {
         ctx.fillStyle = stone_block
       } else {
         ctx.fillStyle = snow_block
       }
       terrainRow.push(ctx.fillStyle)
-
-      ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize)
     }
     terrain.push(terrainRow)
   }
+
+  generateSand()
+  generateOres()
+
+  loadWorld(0, 0)
 }
 generateWorld()
-
-function loadWorld(offsetX, offsetY) {
-  for (let x = 0; x <= row; x++) {
-    for (let y = 0; y <= column; y++) {
-      try {
-        ctx.fillStyle = terrain[x][y]
-      } catch {
-        ctx.fillStyle = water_block
-      }
-
-      ctx.fillRect(x * tileSize + offsetX, y * tileSize + offsetY, tileSize, tileSize)
-    }
-  }
-}
 
 function generateSand() {
   let simplexSand = new SimplexNoise()
@@ -115,10 +103,7 @@ function generateSand() {
       }
     })
   })
-
-  loadWorld()
 }
-generateSand()
 
 function generateOres() {
   let simplexOres = new SimplexNoise()
@@ -139,16 +124,29 @@ function generateOres() {
       }
     })
   })
-
-  loadWorld()
 }
-generateOres()
+
+function loadWorld(offsetX, offsetY) {
+  for (let x = 0; x <= row; x++) {
+    for (let y = 0; y <= column; y++) {
+      try {
+        ctx.fillStyle = terrain[x][y]
+      } catch {
+        ctx.fillStyle = water_block
+      }
+
+      ctx.fillRect(
+        Math.round((canvas.width - tileSize) / 2 / tileSize) * tileSize + x * tileSize + offsetX,
+        Math.round((canvas.height - tileSize) / 2 / tileSize) * tileSize + y * tileSize + offsetY,
+        tileSize,
+        tileSize
+      )
+    }
+  }
+}
 
 //PLAYER & PLAYER MOVEMENT
-function playerMovement() {
-  let xPos = 0
-  let yPos = 0
-
+function spawnPlayer() {
   ctx.fillStyle = 'blue'
   ctx.fillRect(
     Math.round((canvas.width - tileSize) / 2 / tileSize) * tileSize,
@@ -156,21 +154,35 @@ function playerMovement() {
     tileSize,
     tileSize
   )
+}
+
+function playerMovement() {
+  let xPos = 0
+  let yPos = 0
+  spawnPlayer()
 
   document.addEventListener('keydown', (event) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
 
     switch (event.code) {
       case 'KeyW':
+      case 'ArrowUp':
+      case 'Numpad8':
         loadWorld(xPos, (yPos += 10))
         break
       case 'KeyA':
+      case 'ArrowLeft':
+      case 'Numpad4':
         loadWorld((xPos += 10), yPos)
         break
       case 'KeyS':
+      case 'ArrowDown':
+      case 'Numpad2':
         loadWorld(xPos, (yPos -= 10))
         break
       case 'KeyD':
+      case 'ArrowRight':
+      case 'Numpad6':
         loadWorld((xPos -= 10), yPos)
         break
       default:
@@ -178,13 +190,10 @@ function playerMovement() {
         break
     }
 
-    ctx.fillStyle = 'blue'
-    ctx.fillRect(
-      Math.round((canvas.width - tileSize) / 2 / tileSize) * tileSize,
-      Math.round((canvas.height - tileSize) / 2 / tileSize) * tileSize,
-      tileSize,
-      tileSize
-    )
+    spawnPlayer()
+
+    console.clear()
+    console.log(`x: ${-xPos} \ny: ${-yPos}`)
   })
 }
 playerMovement()
