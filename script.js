@@ -17,8 +17,11 @@ const iron_block = '#a5a5a5'
 const snow_block = '#fff'
 
 //WORLD GENERATION
-let row = Math.round(canvas.width / tileSize) * 5
-let column = Math.round(canvas.height / tileSize) * 5
+const centerWorldX = -Math.round((canvas.width - tileSize) / (2 * tileSize)) * tileSize * 5
+const centerWorldY = -Math.round((canvas.height - tileSize) / (2 * tileSize)) * tileSize * 5
+
+const row = Math.round(canvas.width / tileSize) * 5
+const column = Math.round(canvas.height / tileSize) * 5
 
 let terrain = []
 
@@ -44,7 +47,7 @@ function assignTempeture() {
     }
     terrain.push(terrainRow)
   }
-  loadWorld(0, 0)
+  loadWorld(centerWorldX, centerWorldY)
 }
 //assignTempeture()
 
@@ -76,7 +79,7 @@ function generateWorld() {
   generateSand()
   generateOres()
 
-  loadWorld(0, 0)
+  loadWorld(centerWorldX, centerWorldY)
 }
 generateWorld()
 
@@ -135,12 +138,7 @@ function loadWorld(offsetX, offsetY) {
         ctx.fillStyle = water_block
       }
 
-      ctx.fillRect(
-        Math.round((canvas.width - tileSize) / 2 / tileSize) * tileSize + x * tileSize + offsetX,
-        Math.round((canvas.height - tileSize) / 2 / tileSize) * tileSize + y * tileSize + offsetY,
-        tileSize,
-        tileSize
-      )
+      ctx.fillRect(x * tileSize + offsetX, y * tileSize + offsetY, tileSize, tileSize)
     }
   }
 }
@@ -149,16 +147,16 @@ function loadWorld(offsetX, offsetY) {
 function spawnPlayer() {
   ctx.fillStyle = 'blue'
   ctx.fillRect(
-    Math.round((canvas.width - tileSize) / 2 / tileSize) * tileSize,
-    Math.round((canvas.height - tileSize) / 2 / tileSize) * tileSize,
+    Math.round((canvas.width - tileSize) / (2 * tileSize)) * tileSize,
+    Math.round((canvas.height - tileSize) / (2 * tileSize)) * tileSize,
     tileSize,
     tileSize
   )
 }
 
 function playerMovement() {
-  let xPos = 0
-  let yPos = 0
+  let xPos = centerWorldX
+  let yPos = centerWorldY
   spawnPlayer()
 
   document.addEventListener('keydown', (event) => {
