@@ -130,13 +130,9 @@ function generateOres() {
 }
 
 function loadWorld(offsetX, offsetY) {
-  for (let x = 0; x <= row; x++) {
-    for (let y = 0; y <= column; y++) {
-      try {
-        ctx.fillStyle = terrain[x][y]
-      } catch {
-        ctx.fillStyle = water_block
-      }
+  for (let x = 0; x < row; x++) {
+    for (let y = 0; y < column; y++) {
+      ctx.fillStyle = terrain[x][y]
 
       ctx.fillRect(x * tileSize + offsetX, y * tileSize + offsetY, tileSize, tileSize)
     }
