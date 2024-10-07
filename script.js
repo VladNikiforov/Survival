@@ -25,35 +25,9 @@ const column = Math.round(canvas.height / tileSize) * 5
 
 let terrain = []
 
-function assignTempeture() {
-  let simplexTempeture = new SimplexNoise()
-  const tempetureNoiseScale = 0.015
-
-  for (let x = 0; x < row; x++) {
-    let terrainRow = []
-
-    for (let y = 0; y < column; y++) {
-      let tempetureNoiseValue = simplexTempeture.noise2D(x * tempetureNoiseScale, y * tempetureNoiseScale)
-      tempetureNoiseValue = (tempetureNoiseValue + 1) / 2
-
-      if (tempetureNoiseValue >= 0.66) {
-        ctx.fillStyle = snow_block
-      } else if (tempetureNoiseValue >= 0.33) {
-        ctx.fillStyle = grass_block
-      } else if (tempetureNoiseValue >= 0) {
-        ctx.fillStyle = sand_block
-      }
-      terrainRow.push(ctx.fillStyle)
-    }
-    terrain.push(terrainRow)
-  }
-  loadWorld(centerWorldX, centerWorldY)
-}
-//assignTempeture()
-
 function generateWorld() {
   const simplexTerrain = new SimplexNoise()
-  const noiseScale = 0.03
+  const noiseScale = 0.02
 
   for (let x = 0; x < row; x++) {
     let terrainRow = []
